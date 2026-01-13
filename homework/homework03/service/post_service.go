@@ -39,8 +39,8 @@ func (s *PostService) GetPostByID(id uint) (*model.Post, error) {
 	return &post, err
 }
 
-// GetPostWithMostComments 获取评论数量最多的文章
-func (s *PostService) GetPostWithMostComments() (*model.PostWithCommentCount, error) {
+// PrintPostWithMostComments 获取并打印评论数量最多的文章
+func (s *PostService) PrintPostWithMostComments() error {
 	var post model.PostWithCommentCount
 	err := s.db.Model(&model.Post{}).
 		Select("blog_posts.*, count(blog_comments.id) as comment_count").
@@ -48,12 +48,6 @@ func (s *PostService) GetPostWithMostComments() (*model.PostWithCommentCount, er
 		Group("blog_posts.id").
 		Order("comment_count DESC").
 		First(&post).Error
-	return &post, err
-}
-
-// PrintPostWithMostComments 打印评论数量最多的文章
-func (s *PostService) PrintPostWithMostComments() error {
-	post, err := s.GetPostWithMostComments()
 	if err != nil {
 		return err
 	}

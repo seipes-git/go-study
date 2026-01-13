@@ -3,16 +3,13 @@ package db
 import (
 	"time"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
 
 func DBInit() (*gorm.DB, error) {
-	db, _ := gorm.Open(mysql.New(mysql.Config{
-		DSN:               "Alan:seipes@tcp(127.0.0.1:3306)/blog?charset=utf8mb4&parseTime=True&loc=Local", // data source name
-		DefaultStringSize: 191,                                                                             // default size for string fields                                                                         // auto configure based on currently MySQL version
-	}), &gorm.Config{
+	db, _ := gorm.Open(sqlite.Open("db/blog.db"), &gorm.Config{
 		SkipDefaultTransaction: false,
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "blog_", // table name prefix, table for `User` would be `t_users`

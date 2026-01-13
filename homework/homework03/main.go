@@ -38,7 +38,7 @@ func main() {
 
 	// 2.1 查询某个用户发布的所有文章及其对应的评论信息
 	fmt.Println("2.1 查询用户发布的所有文章及其评论:")
-	if err := userService.PrintFirstUserWithPostsAndComments(); err != nil {
+	if err := userService.PrintUserWithPostsAndComments(1); err != nil {
 		fmt.Printf("查询失败: %v\n", err)
 	}
 

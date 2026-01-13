@@ -39,16 +39,10 @@ func (s *UserService) GetUserByID(id uint) (*model.User, error) {
 	return &user, err
 }
 
-// GetUserWithPostsAndComments 获取用户及其所有文章和评论
-func (s *UserService) GetUserWithPostsAndComments(userID uint) (*model.User, error) {
+// PrintUserWithPostsAndComments 获取并打印用户及其文章和评论信息
+func (s *UserService) PrintUserWithPostsAndComments(userID uint) error {
 	var user model.User
 	err := s.db.Preload("Posts").Preload("Posts.Comments").First(&user, userID).Error
-	return &user, err
-}
-
-// PrintUserWithPostsAndComments 打印用户及其文章和评论信息
-func (s *UserService) PrintUserWithPostsAndComments(userID uint) error {
-	user, err := s.GetUserWithPostsAndComments(userID)
 	if err != nil {
 		return err
 	}
@@ -61,20 +55,4 @@ func (s *UserService) PrintUserWithPostsAndComments(userID uint) error {
 		}
 	}
 	return nil
-}
-
-// GetFirstUser 获取第一个用户
-func (s *UserService) GetFirstUser() (*model.User, error) {
-	var user model.User
-	err := s.db.First(&user).Error
-	return &user, err
-}
-
-// PrintFirstUserWithPostsAndComments 打印第一个用户及其文章和评论信息
-func (s *UserService) PrintFirstUserWithPostsAndComments() error {
-	user, err := s.GetFirstUser()
-	if err != nil {
-		return err
-	}
-	return s.PrintUserWithPostsAndComments(user.ID)
 }

@@ -1,6 +1,6 @@
 module local/go_study
 
-go 1.25.5
+go 1.22
 
 require (
 	gorm.io/driver/mysql v1.6.0

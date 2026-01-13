@@ -34,9 +34,10 @@ func (s *DataService) InitDatabase() error {
 func (s *DataService) CreateTestData() error {
 	// 清空数据库并重置自增 ID
 	fmt.Println("清空数据库...")
-	s.db.Exec("TRUNCATE TABLE blog_comments")
-	s.db.Exec("TRUNCATE TABLE blog_posts")
-	s.db.Exec("TRUNCATE TABLE blog_users")
+	s.db.Exec("DELETE FROM blog_comments")
+	s.db.Exec("DELETE FROM blog_posts")
+	s.db.Exec("DELETE FROM blog_users")
+	s.db.Exec("DELETE FROM sqlite_sequence WHERE name IN ('blog_comments', 'blog_posts', 'blog_users')")
 
 	// 创建10个用户
 	users := []model.User{
@@ -56,18 +57,18 @@ func (s *DataService) CreateTestData() error {
 		return err
 	}
 
-	// 创建10篇文章，使用实际的用户 ID
+	// 创建10篇文章，使用实际的用户 ID，不同用户有不等的文章数量
 	posts := []model.Post{
 		{Title: "Go语言入门", Content: "Go语言是一门简单高效的编程语言", UserID: users[0].ID},
+		{Title: "Go并发编程", Content: "Go语言的并发模型非常优雅", UserID: users[0].ID},
+		{Title: "Go标准库详解", Content: "Go标准库提供了丰富的功能", UserID: users[0].ID},
 		{Title: "Gorm基础教程", Content: "Gorm是Go语言最流行的ORM框架", UserID: users[1].ID},
-		{Title: "微服务架构设计", Content: "微服务架构的优势与挑战", UserID: users[1].ID},
-		{Title: "Docker容器技术", Content: "Docker让应用部署变得简单", UserID: users[1].ID},
-		{Title: "Kubernetes入门", Content: "Kubernetes是容器编排的事实标准", UserID: users[2].ID},
-		{Title: "Redis缓存优化", Content: "Redis在项目中的实际应用", UserID: users[2].ID},
+		{Title: "Gorm高级特性", Content: "Gorm的钩子函数和事务处理", UserID: users[1].ID},
+		{Title: "微服务架构设计", Content: "微服务架构的优势与挑战", UserID: users[2].ID},
+		{Title: "Docker容器技术", Content: "Docker让应用部署变得简单", UserID: users[2].ID},
 		{Title: "MySQL性能调优", Content: "MySQL数据库性能优化的技巧", UserID: users[3].ID},
-		{Title: "Vue.js实战", Content: "Vue.js前端开发实践", UserID: users[3].ID},
-		{Title: "Spring Boot开发", Content: "Spring Boot快速开发企业级应用", UserID: users[4].ID},
-		{Title: "机器学习入门", Content: "机器学习算法原理与应用", UserID: users[4].ID},
+		{Title: "Vue.js实战", Content: "Vue.js前端开发实践", UserID: users[4].ID},
+		{Title: "Kubernetes入门", Content: "Kubernetes是容器编排的事实标准", UserID: users[5].ID},
 	}
 
 	createdPosts, err := s.postService.CreatePosts(posts)
