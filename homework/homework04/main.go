@@ -25,13 +25,19 @@ func main() {
 	}
 
 	// 自动迁移
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{}); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
 	// 初始化服务
 	userService := services.NewUserService(db)
 	userHandler := handlers.NewUserHandler(userService, []byte(cfg.JWT.Secret))
+
+	postService := services.NewPostService(db)
+	postHandler := handlers.NewPostHandler(postService)
+
+	commentService := services.NewCommentService(db)
+	commentHandler := handlers.NewCommentHandler(commentService)
 
 	// 创建 Gin 引擎
 	r := gin.Default()
@@ -52,6 +58,14 @@ func main() {
 	{
 		public.POST("/users/register", userHandler.Register)
 		public.POST("/users/login", userHandler.Login)
+
+		// 文章相关路由（公开）
+		public.GET("/posts", postHandler.GetPosts)
+		public.GET("/posts/:id", postHandler.GetPostByID)
+		public.GET("/posts/title/:title", postHandler.GetPostByTitle)
+
+		// 评论相关路由（公开）
+		public.GET("/posts/:id/comments", commentHandler.GetCommentsByPostID)
 	}
 
 	// 需要认证的路由
@@ -60,6 +74,14 @@ func main() {
 	{
 		protected.GET("/users/me", userHandler.GetProfile)
 		protected.PUT("/users/me", userHandler.UpdateProfile)
+
+		// 文章相关路由（需要认证）
+		protected.POST("/posts", postHandler.CreatePost)
+		protected.PUT("/posts/:id", postHandler.UpdatePost)
+		protected.DELETE("/posts/:id", postHandler.DeletePost)
+
+		// 评论相关路由（需要认证）
+		protected.POST("/comments", commentHandler.CreateComment)
 	}
 
 	// 启动服务器
