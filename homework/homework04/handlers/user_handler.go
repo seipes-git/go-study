@@ -30,7 +30,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.CreateUser(&req)
+	user, err := h.userService.CreateUser(req)
 	if err != nil {
 		utils.HandleError(c, err)
 		return

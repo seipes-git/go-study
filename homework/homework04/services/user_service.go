@@ -17,7 +17,7 @@ func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{db: db}
 }
 
-func (s *UserService) CreateUser(req *models.CreateUserRequest) (*models.User, error) {
+func (s *UserService) CreateUser(req models.CreateUserRequest) (*models.User, error) {
 	// 检查用户名是否已存在
 	var existingUser models.User
 	if err := s.db.Where("username = ?", req.Username).First(&existingUser).Error; err == nil {
