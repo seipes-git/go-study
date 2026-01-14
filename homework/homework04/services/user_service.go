@@ -97,3 +97,16 @@ func (s *UserService) UpdateUser(id uint, req models.UpdateUserRequest) (*models
 
 	return user, nil
 }
+
+func (s *UserService) DeleteUser(id uint) error {
+	user, err := s.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.db.Delete(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

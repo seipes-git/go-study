@@ -72,3 +72,45 @@ func (s *CommentService) GetCommentsByPostID(postID uint) ([]models.CommentRespo
 
 	return responses, nil
 }
+
+func (s *CommentService) DeleteComment(id uint) error {
+	comment, err := s.GetCommentByID(id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.db.Delete(&comment).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *CommentService) DeleteCommentWithAuth(userID, commentID uint) error {
+	comment, err := s.GetCommentByID(commentID)
+	if err != nil {
+		return err
+	}
+
+	// 验证权限：只能删除自己的评论
+	if comment.UserID != userID {
+		return utils.NewAppError(403, "You can only delete your own comments")
+	}
+
+	if err := s.db.Delete(&comment).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *CommentService) GetCommentByID(id uint) (*models.Comment, error) {
+	var comment models.Comment
+	if err := s.db.First(&comment, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, utils.NewAppError(404, "Comment not found")
+		}
+		return nil, err
+	}
+	return &comment, nil
+}

@@ -74,6 +74,7 @@ func main() {
 	{
 		protected.GET("/users/me", userHandler.GetProfile)
 		protected.PUT("/users/me", userHandler.UpdateProfile)
+		protected.DELETE("/users/:id", userHandler.DeleteUser)
 
 		// 文章相关路由（需要认证）
 		protected.POST("/posts", postHandler.CreatePost)
@@ -82,6 +83,7 @@ func main() {
 
 		// 评论相关路由（需要认证）
 		protected.POST("/comments", commentHandler.CreateComment)
+		protected.DELETE("/comments/:id", commentHandler.DeleteComment)
 	}
 
 	// 启动服务器

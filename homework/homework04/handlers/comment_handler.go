@@ -72,3 +72,31 @@ func (h *CommentHandler) GetCommentsByPostID(c *gin.Context) {
 
 	utils.Success(c, comments)
 }
+
+// DeleteComment 删除评论
+func (h *CommentHandler) DeleteComment(c *gin.Context) {
+	// 获取当前用户 ID
+	currentUserID, exists := c.Get("userID")
+	if !exists {
+		utils.Error(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	// 获取要删除的评论 ID
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		utils.Error(c, http.StatusBadRequest, "Invalid comment id")
+		return
+	}
+
+	// 删除评论（带权限验证）
+	if err := h.commentService.DeleteCommentWithAuth(currentUserID.(uint), uint(id)); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, gin.H{
+		"message": "Comment deleted successfully",
+	})
+}

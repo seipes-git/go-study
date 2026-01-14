@@ -5,6 +5,7 @@ import (
 	"homework04/services"
 	"homework04/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -123,6 +124,40 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		CreatedAt: user.CreatedAt,
 	})
 }
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	// 获取当前用户 ID
+	currentUserID, exists := c.Get("userID")
+	if !exists {
+		utils.Error(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	// 获取要删除的用户 ID
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		utils.Error(c, http.StatusBadRequest, "Invalid user id")
+		return
+	}
+
+	// 验证权限：只能删除自己的账户
+	if uint(id) != currentUserID.(uint) {
+		utils.Error(c, http.StatusForbidden, "You can only delete your own account")
+		return
+	}
+
+	// 删除用户
+	if err := h.userService.DeleteUser(uint(id)); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, gin.H{
+		"message": "User deleted successfully",
+	})
+}
+
 func parseValidationErrors(err error) map[string]string {
 	errors := make(map[string]string)
 	// 简化处理，实际应该解析 binding 错误
