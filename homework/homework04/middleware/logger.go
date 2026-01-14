@@ -1,32 +1,22 @@
-package utils
+package middleware
 
 import (
-	"log"
-	"os"
+	"fmt"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-var (
-	InfoLogger  *log.Logger
-	ErrorLogger *log.Logger
-)
+func Logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		method := c.Request.Method
 
-func InitLogger() {
-	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-}
+		c.Next()
 
-func LogInfo(v ...interface{}) {
-	InfoLogger.Println(v...)
-}
-
-func LogError(v ...interface{}) {
-	ErrorLogger.Println(v...)
-}
-
-func LogInfof(format string, v ...interface{}) {
-	InfoLogger.Printf(format, v...)
-}
-
-func LogErrorf(format string, v ...interface{}) {
-	ErrorLogger.Printf(format, v...)
+		latency := time.Since(start)
+		status := c.Writer.Status()
+		fmt.Printf("[%s] %s %d %v\n", method, path, status, latency)
+	}
 }

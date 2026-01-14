@@ -4,6 +4,7 @@ import (
 	"homework04/models"
 	"homework04/services"
 	"homework04/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -76,9 +77,13 @@ func (h *UserHandler) Login(c *gin.Context) {
 }
 
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	userID, _ := c.Get("userID")
+	userID, exists := c.Get("userID")
+	if !exists {
+		utils.Error(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
 
-	user, err := h.userService.GetUserByID(userID.(int))
+	user, err := h.userService.GetUserByID(userID.(uint))
 	if err != nil {
 		utils.HandleError(c, err)
 		return
@@ -92,6 +97,32 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	})
 }
 
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		utils.Error(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	var req models.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationError(c, parseValidationErrors(err))
+		return
+	}
+
+	user, err := h.userService.UpdateUser(userID.(uint), req)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, models.UserResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	})
+}
 func parseValidationErrors(err error) map[string]string {
 	errors := make(map[string]string)
 	// 简化处理，实际应该解析 binding 错误

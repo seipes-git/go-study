@@ -8,7 +8,7 @@ import (
 )
 
 type Claims struct {
-	UserID   int    `json:"user_id"`
+	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
@@ -17,7 +17,7 @@ var jwtSecret = []byte("your-secret-key")
 
 // Token 生成
 
-func GenerateToken(secret []byte, userID int, username string) (string, error) {
+func GenerateToken(secret []byte, userID uint, username string) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
@@ -34,9 +34,12 @@ func GenerateToken(secret []byte, userID int, username string) (string, error) {
 
 // Token 验证
 
-func parseToken(tokenString string) (*Claims, error) {
+func ParseToken(tokenString string, secret []byte) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return secret, nil
 	})
 
 	if err != nil {
