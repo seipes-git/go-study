@@ -1,21 +1,56 @@
 package handlers
 
 import (
+	"homework04/models"
+	"homework04/services"
+	"homework04/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandler struct{}
+type UserHandler struct {
+	userService *services.UserService
+	jwtSecret   []byte
+}
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{}
+func NewUserHandler(userService *services.UserService, jwtSecret []byte) *UserHandler {
+	return &UserHandler{
+		userService: userService,
+		jwtSecret:   jwtSecret,
+	}
 }
 
 // Register 用户注册
 func (h *UserHandler) Register(c *gin.Context) {
 	// TODO: 实现用户注册逻辑
+	var req models.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationError(c, parseValidationErrors(err))
+		return
+	}
+
+	user, err := h.userService.CreateUser(&req)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, models.UserResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	})
 }
 
 // Login 用户登录
 func (h *UserHandler) Login(c *gin.Context) {
 	// TODO: 实现用户登录逻辑
+}
+
+func parseValidationErrors(err error) map[string]string {
+	errors := make(map[string]string)
+	// 简化处理，实际应该解析 binding 错误
+	errors["general"] = err.Error()
+	return errors
 }

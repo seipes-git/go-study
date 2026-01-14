@@ -6,7 +6,6 @@ import (
 	"homework04/handlers"
 	"homework04/middleware"
 	"homework04/models"
-	"homework04/services"
 	"homework04/utils"
 	"log"
 
@@ -33,17 +32,6 @@ func main() {
 		utils.LogErrorf("数据库迁移失败: %v", err)
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
-
-	utils.LogInfo("数据库表迁移成功")
-
-	// 导入种子数据
-	err = services.SeedData(database)
-	if err != nil {
-		utils.LogErrorf("种子数据导入失败: %v", err)
-		log.Fatalf("种子数据导入失败: %v", err)
-	}
-
-	utils.LogInfo("种子数据导入完成")
 
 	// 初始化 Gin 路由
 	r := gin.Default()
