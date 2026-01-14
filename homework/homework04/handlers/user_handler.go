@@ -46,6 +46,50 @@ func (h *UserHandler) Register(c *gin.Context) {
 // Login 用户登录
 func (h *UserHandler) Login(c *gin.Context) {
 	// TODO: 实现用户登录逻辑
+	var req models.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationError(c, parseValidationErrors(err))
+		return
+	}
+
+	user, err := h.userService.Authenticate(req.Username, req.Password)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	token, err := utils.GenerateToken(h.jwtSecret, user.ID, user.Username)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, gin.H{
+		"token": token,
+		"user": models.UserResponse{
+			ID:        user.ID,
+			Username:  user.Username,
+			Email:     user.Email,
+			CreatedAt: user.CreatedAt,
+		},
+	})
+}
+
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	userID, _ := c.Get("userID")
+
+	user, err := h.userService.GetUserByID(userID.(int))
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	utils.Success(c, models.UserResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	})
 }
 
 func parseValidationErrors(err error) map[string]string {

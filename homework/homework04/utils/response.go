@@ -1,9 +1,6 @@
 package utils
 
 import (
-	"errors"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,29 +56,4 @@ func InternalServerError(c *gin.Context, message string) {
 		Code:    http.StatusInternalServerError,
 		Message: message,
 	})
-}
-
-type AppError struct {
-	Code    int
-	Message string
-	Err     error
-}
-
-func (e *AppError) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("%s: %v", e.Message, e.Err)
-	}
-	return e.Message
-}
-
-func HandleError(c *gin.Context, err error) {
-	var appErr *AppError
-	if errors.As(err, &appErr) {
-		Error(c, appErr.Code, appErr.Message)
-		return
-	}
-
-	// 未知错误，记录日志但不暴露给客户端
-	log.Printf("Internal error: %v", err)
-	Error(c, 500, "Internal server error")
 }

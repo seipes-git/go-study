@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"homework04/models"
 	"homework04/utils"
 
@@ -45,5 +46,16 @@ func (s *UserService) CreateUser(req *models.CreateUserRequest) (*models.User, e
 		return nil, err
 	}
 
+	return &user, nil
+}
+
+func (s *UserService) GetUserByID(id int) (*models.User, error) {
+	var user models.User
+	if err := s.db.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, &utils.AppError{Code: 404, Message: "User not found"}
+		}
+		return nil, err
+	}
 	return &user, nil
 }
