@@ -19,7 +19,7 @@ func main() {
 	cfg := config.Load()
 
 	// 初始化数据库
-	db, err := gorm.Open(sqlite.Open("blog.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("blog.db?_pragma=encoding=utf8"), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect database")
 	}
